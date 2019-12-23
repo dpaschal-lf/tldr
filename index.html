@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>dan's bitly</title>
+    <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+</head>
+<body>
+    <div class="shortURLContainer">Your url: <span></span></div>
+    <input type="text" name="url" id="urlInput">
+    <button id="createLink">create</button>
+    <script>
+$(document).ready( startApp );
+function startApp(){
+    applyEventListeners();
+}
+function applyEventListeners(){
+    const linkButton = document.querySelector('#createLink');
+    linkButton.addEventListener('click', handleCreateURL );
+}
+
+function handleCreateURL(){
+    var targetURL = $("#urlInput").val();
+    if(targetURL.length<3){
+        alert('url must be at least 3 characters');
+    }
+    if(!/\w{1,}\.\w{1,}/.test(targetURL)){
+        alert('url must be of the right format');
+    }
+    $.ajax({
+        url: `https://3k2unypowc.execute-api.us-west-2.amazonaws.com/test/url?url=${targetURL}`,
+        method: 'POST',
+        success: (response)=>{
+            alert('the url has been added');
+        }
+    })
+}
+    </script>
+</body>
+</html>
