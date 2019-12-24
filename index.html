@@ -2,38 +2,66 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>dan's bitly</title>
     <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
 </head>
 <body>
-    <div class="shortURLContainer">Your url: <span></span></div>
-    <input type="text" name="url" id="urlInput">
-    <button id="createLink">create</button>
+    <div class="centerContents">
+        <div class="shortURLContainer">URL Shortener: <span></span></div>
+        <input type="text" name="url" id="urlInput" placeholder="original url">
+        <button id="createLink">create</button>
+        <div id="shortenedURL">
+            <a id="aTag" href="#" target="_blank"><span id="baseAddress"></span><span id="showPath">---</span></a>
+        </div>
+    </div>
+    <div id="modalShadow">
+        <div id="modalBody">
+            <div id="modalClose">X</div>
+            <div id="modalContent"></div>
+        </div>
+    </div>
     <script>
+const shortenedURL = 'https://3k2unypowc.execute-api.us-west-2.amazonaws.com/test/';
 $(document).ready( startApp );
 function startApp(){
+    populateBaseURL();
     applyEventListeners();
 }
+function populateBaseURL(){
+    $("#baseAddress").text(shortenedURL + '/');
+}
 function applyEventListeners(){
-    const linkButton = document.querySelector('#createLink');
-    linkButton.addEventListener('click', handleCreateURL );
+    $("#createLink").on('click', handleCreateURL );
+    $("#modalShadow, #modalClose").on('click', hideModal );
+}
+function displayModal( message ){
+    $("#modalContent").html( message );
+    $("#modalShadow").show();
+}
+function hideModal(){
+    $("#modalShadow").hide();
 }
 
 function handleCreateURL(){
     var targetURL = $("#urlInput").val();
     if(targetURL.length<3){
-        alert('url must be at least 3 characters');
+        showModal('url must be at least 3 characters');
     }
     if(!/\w{1,}\.\w{1,}/.test(targetURL)){
-        alert('url must be of the right format');
+        showModal('url must be of the right format');
     }
     $.ajax({
-        url: `https://3k2unypowc.execute-api.us-west-2.amazonaws.com/test/url?url=${targetURL}`,
+        url: `${shortenedURL}/url?url=${targetURL}`,
         method: 'POST',
-        success: (response)=>{
-            alert('the url has been added');
+        success: response=>{
+            $("#showPath").text(response.tinyURL);
+            $("#aTag").attr('href', shortenedURL + '/' + response.tinyURL);
+        },
+        error: response=>{
+            showModal('error making url, please try again');
         }
     })
 }

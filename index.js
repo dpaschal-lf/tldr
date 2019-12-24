@@ -34,7 +34,8 @@ function read(event, context, callback){
   //       return   callback(null, {
   //   body: JSON.stringify(event),
   //   statusCode: 200
-  // })
+  // }) 
+    const url = event.queryStringParameters ? event.queryStringParameters.url : event.pathParameters.shortURL;
     const ddb = new AWS.DynamoDB({
         region: 'us-west-2'
     });
@@ -42,7 +43,7 @@ function read(event, context, callback){
         TableName: 'tldrURLData',
         Key: {
          "tinyURL": {
-           S: event.queryStringParameters.url
+           S: url
           }
         }
     };
@@ -63,7 +64,6 @@ function read(event, context, callback){
       })
       
     })
-    onsole.log("OOOOOOOOO");
 
 };
 
@@ -77,6 +77,12 @@ function create(event, context, callback){
 
     const currentTime = ''+ Date.now();
     const randomKey = generateRandomKey();
+    if(event.queryStringParameters===null){
+      callback(null,{
+        statusCode: 500,
+        body: 'must supply url in query string'
+      })
+    }
     const params = {
         TableName: 'tldrURLData',
         Item: {
@@ -95,10 +101,20 @@ function create(event, context, callback){
       //   statusCode: 200,
       //   body: 'straight up now tell me'
       // })
-      callback(null, {
-        statusCode: 200,
-        body: JSON.stringify({ tinyURL: randomKey })
-      });
+      if(!err){
+        callback(null, {
+          statusCode: 200,
+          headers: {
+            'Access-Control-Allow-Origin': '*'
+          },
+          body: JSON.stringify({ tinyURL: randomKey })
+        });
+      } else {
+        callback( null, {
+          statusCode: 500,
+          body: "error: " + JSON.stringify(err)
+        })
+      }
     })
 
 };
